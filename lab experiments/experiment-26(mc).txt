@@ -1,0 +1,38 @@
+NED file
+package captureexample;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+network CaptureNet
+{
+submodules:
+configurator: Ipv4NetworkConfigurator;
+client: StandardHost;
+router: Router;
+server: StandardHost;
+connections:
+client.ethg++ <--> Eth100M <--> router.ethg++;
+router.ethg++ <--> Eth100M <--> server.ethg++;
+}
+omnetpp.ini
+[General]
+network = CaptureNet
+sim-time-limit = 20s
+# applications
+*.client.numApps = 2
+*.client.app[0].typename = "PingApp"
+*.client.app[0].destAddr = "server"
+*.client.app[0].startTime = 1s
+*.client.app[1].typename = "UdpBasicApp"
+*.client.app[1].destAddresses = "server"
+*.client.app[1].destPort = 1000
+*.client.app[1].messageLength = 800B
+*.client.app[1].sendInterval = 100ms
+*.client.app[1].startTime = 2s
+*.server.numApps = 1# packet capture at the router
+*.router.numPcapRecorders = 1
+*.router.pcapRecorder[0].pcapFile = "results/capture.pcap"
+*.router.pcapRecorder[0].moduleNamePatterns = "eth[*]"
+*.server.app[0].typename = "UdpSink"
+*.server.app[0].localPort = 1000
